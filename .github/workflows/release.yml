@@ -36,6 +36,8 @@ jobs:
             --configuration Release `
             --runtime win-x64 `
             --self-contained true `
+            "-p:PublishSingleFile=true" `
+            "-p:IncludeNativeLibrariesForSelfExtract=true" `
             --output .\artifacts\publish `
             "-p:Version=$version" `
             "-p:AssemblyVersion=$version" `

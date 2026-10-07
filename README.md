@@ -109,11 +109,11 @@ Trong câu trả lời AI, cú pháp Markdown `![mô tả](https://...)` cũng �
 Các bản phát hành được tạo từ GitHub Actions. Sau khi đẩy mã nguồn lên `main`, tạo và đẩy tag phiên bản mới:
 
 ```powershell
-git tag v1.0.3
-git push origin v1.0.3
+git tag v1.0.4
+git push origin v1.0.4
 ```
 
-Workflow kiểm thử, publish bản tự chứa `win-x64`, tạo `update.json` có hash SHA-256 và đăng `VinhAI.exe` cùng manifest vào GitHub Release. Để phát hành bản tiếp theo, dùng tag mới lớn hơn bản hiện tại (ví dụ `v1.0.4`). Máy đang chạy bản 1.0.2 trở về trước cần nhập URL manifest ở trên một lần trong cài đặt để nhận bản cập nhật đầu tiên; các bản phát hành mới có URL mặc định.
+Workflow kiểm thử, publish một tệp `VinhAI.exe` tự chứa cho `win-x64`, tạo `update.json` có hash SHA-256 và đăng cả hai vào GitHub Release. Để phát hành bản tiếp theo, dùng tag mới lớn hơn bản hiện tại (ví dụ `v1.0.5`). Máy đang chạy bản 1.0.2 trở về trước cần nhập URL manifest ở trên một lần trong cài đặt để nhận bản cập nhật đầu tiên; các bản phát hành mới có URL mặc định.
 
 ## 📡 Triển khai ChatServer để chat trực tuyến
 
