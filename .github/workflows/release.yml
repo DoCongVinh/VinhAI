@@ -1,0 +1,65 @@
+name: Build and publish VinhAI release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Test
+        run: dotnet test .\AIOrchestrator.Tests\AIOrchestrator.Tests.csproj --configuration Release --verbosity minimal
+
+      - name: Publish self-contained Windows app
+        shell: pwsh
+        env:
+          APP_TAG: ${{ github.ref_name }}
+        run: |
+          $version = $env:APP_TAG -replace '^v', ''
+          if ($version -notmatch '^\d+\.\d+\.\d+(\.\d+)?$') {
+            throw "Release tag must use vMAJOR.MINOR.PATCH format."
+          }
+          dotnet publish .\AIOrchestrator\AIOrchestrator.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --self-contained true `
+            --output .\artifacts\publish `
+            "-p:Version=$version" `
+            "-p:AssemblyVersion=$version" `
+            "-p:FileVersion=$version"
+          if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed." }
+          $executable = Join-Path (Resolve-Path .\artifacts\publish) "VinhAI.exe"
+          if (-not (Test-Path $executable)) { throw "Published VinhAI.exe was not found." }
+          $hash = (Get-FileHash $executable -Algorithm SHA256).Hash.ToLowerInvariant()
+          $manifest = [ordered]@{
+            version = $version
+            downloadUrl = "https://github.com/DoCongVinh/VinhAI/releases/download/$($env:APP_TAG)/VinhAI.exe"
+            sha256 = $hash
+            releaseNotes = "VinhAI $version"
+          }
+          $manifest | ConvertTo-Json | Set-Content .\artifacts\publish\update.json -Encoding utf8
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create $env:APP_TAG `
+            .\artifacts\publish\VinhAI.exe `
+            .\artifacts\publish\update.json `
+            --title "VinhAI $($env:APP_TAG)" `
+            --generate-notes

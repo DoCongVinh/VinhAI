@@ -1,0 +1,717 @@
+<Window x:Class="AIOrchestrator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:models="clr-namespace:AIOrchestrator.Models"
+        mc:Ignorable="d"
+        Title="Vinh-AI - Tích Hợp Đa AI Chuyên Dụng"
+        Height="840" Width="1240"
+        MinHeight="700" MinWidth="1000"
+        WindowStartupLocation="CenterScreen"
+        Background="#0F172A" Foreground="#F8FAFC"
+        FontFamily="Segoe UI">
+
+    <Window.Resources>
+        <!-- Styles -->
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#1E293B"/>
+            <Setter Property="Foreground" Value="#F8FAFC"/>
+            <Setter Property="BorderBrush" Value="#334155"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Background" Value="#1E293B"/>
+            <Setter Property="Foreground" Value="#94A3B8"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Foreground" Value="#38BDF8"/>
+                    <Setter Property="BorderBrush" Value="#38BDF8"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <DataTemplate x:Key="FollowUpMessageTemplate">
+            <Border Background="#1E293B" BorderBrush="#334155" BorderThickness="1" CornerRadius="5"
+                    Padding="7,5" Margin="0,0,0,5">
+                <StackPanel>
+                    <TextBlock Text="{Binding SenderName}" FontWeight="SemiBold" FontSize="11"
+                               Foreground="{Binding HeaderColor}" Margin="0,0,0,3"/>
+                    <TextBox Text="{Binding Content}" IsReadOnly="True" IsReadOnlyCaretVisible="True"
+                             AcceptsReturn="True" TextWrapping="Wrap" MaxHeight="100"
+                             Background="Transparent" Foreground="#F8FAFC" BorderThickness="0"
+                             Padding="0" FontSize="12" VerticalScrollBarVisibility="Auto"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <!-- Top App Bar -->
+            <RowDefinition Height="Auto"/>
+            <!-- Main Content Area -->
+            <RowDefinition Height="*"/>
+            <!-- Bottom Status Bar -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- TOP APP BAR -->
+        <Border Grid.Row="0" Background="#1E293B" BorderBrush="#334155" BorderThickness="0,0,0,1" Padding="18,10">
+            <DockPanel LastChildFill="True">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+                    <TextBlock x:Name="TxtCurrentUser" Text="👤 Khách" FontSize="12" Foreground="#94A3B8"
+                               VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <Button x:Name="BtnAdminPanel" Content="🛡️ Quản trị" Padding="10,6" Background="#334155" Foreground="#F8FAFC"
+                            BorderBrush="#475569" FontWeight="SemiBold" Cursor="Hand" Click="BtnAdminPanel_Click" Margin="0,0,8,0"/>
+                    <Button x:Name="BtnContactAdmin" Content="💬 Liên hệ admin" Padding="10,6" Background="#334155"
+                            Foreground="#F8FAFC" BorderBrush="#475569" Cursor="Hand"
+                            Click="BtnContactAdmin_Click" Margin="0,0,8,0"/>
+                    <Button x:Name="BtnAccount" Padding="10,6" Background="Transparent" Foreground="#94A3B8"
+                            BorderBrush="#475569" Cursor="Hand" Click="BtnAccount_Click" Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock x:Name="TxtAccountAvatarFallback" Text="👤" Margin="0,0,5,0"/>
+                            <Image x:Name="ImgAccountAvatar" Width="20" Height="20" Margin="0,0,5,0"
+                                   Stretch="UniformToFill" Visibility="Collapsed"/>
+                            <TextBlock Text="Tài khoản"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="BtnChangePassword" Content="🔑 Đổi mật khẩu" Padding="10,6" Background="Transparent" Foreground="#94A3B8"
+                            BorderBrush="#475569" Cursor="Hand" Click="BtnChangePassword_Click" Margin="0,0,8,0"/>
+                    <Button x:Name="BtnLogout" Content="🚪 Đăng xuất" Padding="10,6" Background="Transparent" Foreground="#F87171"
+                            BorderBrush="#475569" Cursor="Hand" Click="BtnLogout_Click" Margin="0,0,8,0"/>
+                    <Button x:Name="BtnSettings" Content="⚙️ Cài Đặt API Keys" Padding="12,6" Background="#334155" Foreground="#F8FAFC"
+                            BorderBrush="#475569" FontWeight="SemiBold" Cursor="Hand" Click="BtnSettings_Click" Margin="0,0,10,0"/>
+                    <Button x:Name="BtnQuickHelp" Content="❓ Hướng Dẫn" Padding="10,6" Background="Transparent" Foreground="#94A3B8"
+                            BorderBrush="#475569" Cursor="Hand" Click="BtnQuickHelp_Click"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="⚡" FontSize="26" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                    <StackPanel>
+                        <TextBlock Text="VINH-AI" FontSize="18" FontWeight="Bold" Foreground="#38BDF8"/>
+                        <TextBlock Text="Tích hợp các AI chuyên biệt • Trao đổi theo từng trường hợp • 0 MB dung lượng lưu trữ trên máy" 
+                                   FontSize="12" Foreground="#94A3B8"/>
+                    </StackPanel>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- MAIN CONTENT AREA -->
+        <Grid x:Name="MainContentArea" Grid.Row="1" Margin="14">
+            <Grid.ColumnDefinitions>
+                <!-- Left: Agents List -->
+                <ColumnDefinition Width="380" MinWidth="300" MaxWidth="500"/>
+                <ColumnDefinition Width="8"/>
+                <!-- Right: Orchestration Workspace -->
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT PANEL: SEARCH / HISTORY + AGENTS CATALOG & STATUS -->
+            <Border Grid.Column="0" Background="#1E293B" CornerRadius="8" BorderBrush="#334155" BorderThickness="1" Padding="14">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- Search + new chat -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Conversation history -->
+                        <RowDefinition Height="220"/>
+                        <!-- Agents header -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Agents list -->
+                        <RowDefinition Height="*"/>
+                        <!-- Footer note -->
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- SEARCH + NEW CHAT -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                        <Button x:Name="BtnNewChat" Content="➕ Cuộc trò chuyện mới" Height="34"
+                                Background="#2563EB" Foreground="White" FontWeight="SemiBold" FontSize="12"
+                                BorderThickness="0" Cursor="Hand" Click="BtnNewChat_Click" Margin="0,0,0,8"/>
+                        <DockPanel LastChildFill="True">
+                            <Button x:Name="BtnSearch" DockPanel.Dock="Right" Content="🔍" Width="36" Height="32"
+                                    Background="#334155" Foreground="#F8FAFC" BorderBrush="#475569"
+                                    Cursor="Hand" Click="BtnSearch_Click" Margin="6,0,0,0"/>
+                            <Button x:Name="BtnClearSearch" DockPanel.Dock="Right" Content="✖" Width="32" Height="32"
+                                    Background="Transparent" Foreground="#94A3B8" BorderBrush="#475569"
+                                    Cursor="Hand" Click="BtnClearSearch_Click" Margin="6,0,0,0"/>
+                            <TextBox x:Name="TxtSearchBox" Height="32" VerticalContentAlignment="Center"
+                                     TextChanged="TxtSearchBox_TextChanged"
+                                     ToolTip="Tìm kiếm trong lịch sử trò chuyện (tiêu đề &amp; nội dung)"/>
+                        </DockPanel>
+                    </StackPanel>
+
+                    <!-- CONVERSATION HISTORY -->
+                    <Border Grid.Row="1" Background="#0F172A" CornerRadius="6" BorderBrush="#334155" BorderThickness="1" Padding="8" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <DockPanel Grid.Row="0" Margin="0,0,0,6" LastChildFill="True">
+                                <TextBlock Text="🕘 LỊCH SỬ TRÒ CHUYỆN" FontSize="11" FontWeight="Bold" Foreground="#F1F5F9" VerticalAlignment="Center"/>
+                                <Button x:Name="BtnHistoryRefresh" Content="↻" Width="26" Height="22"
+                                        Background="Transparent" Foreground="#94A3B8" BorderThickness="0"
+                                        Cursor="Hand" Click="BtnHistoryRefresh_Click" HorizontalAlignment="Right"/>
+                            </DockPanel>
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl x:Name="ItemsHistoryList">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type models:ConversationSummary}">
+                                            <Border Background="#1E293B" CornerRadius="5" BorderBrush="#334155" BorderThickness="1"
+                                                    Padding="8,6" Margin="0,0,0,6">
+                                                <DockPanel LastChildFill="True">
+                                                    <Button DockPanel.Dock="Right" Content="✏️" Width="24" Height="24"
+                                                            Background="Transparent" Foreground="#38BDF8" BorderThickness="0"
+                                                            Cursor="Hand" Click="BtnRenameHistory_Click" Tag="{Binding}"/>
+                                                    <Button DockPanel.Dock="Right" Content="🗑️" Width="24" Height="24"
+                                                            Background="Transparent" Foreground="#EF4444" BorderThickness="0"
+                                                            Cursor="Hand" Click="BtnDeleteHistory_Click" Tag="{Binding}"/>
+                                                    <Button Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                                            HorizontalContentAlignment="Left" Padding="0" Tag="{Binding}"
+                                                            Click="BtnHistoryItem_Click">
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding DisplayName}" FontSize="12" FontWeight="SemiBold"
+                                                                       Foreground="#F8FAFC" TextTrimming="CharacterEllipsis"/>
+                                                            <TextBlock Text="{Binding Subtitle}" FontSize="10" Foreground="#64748B" Margin="0,2,0,0"/>
+                                                            <TextBlock Text="{Binding Preview}" FontSize="10" Foreground="#94A3B8"
+                                                                       TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                                                        </StackPanel>
+                                                    </Button>
+                                                </DockPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+
+                    <!-- Header -->
+                    <StackPanel Grid.Row="2" Margin="0,0,0,10">
+                        <DockPanel LastChildFill="True">
+                            <TextBlock Text="DANH SÁCH AI CHUYÊN BIỆT" FontSize="14" FontWeight="Bold" Foreground="#F1F5F9" VerticalAlignment="Center"/>
+                            <Button Content="+ Thêm AI" HorizontalAlignment="Right" Padding="8,4" Background="#0EA5E9" Foreground="White"
+                                    BorderThickness="0" FontWeight="SemiBold" FontSize="11" Cursor="Hand" Click="BtnAddAgent_Click"/>
+                        </DockPanel>
+                        <TextBlock Text="Mỗi AI đảm nhận 1 chuyên môn và chỉ thức dậy khi được gọi."
+                                   FontSize="11" Foreground="#64748B" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <!-- Agents List -->
+                    <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" Margin="0,0,-4,0">
+                        <ItemsControl x:Name="ItemsAgentsList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type models:AiAgent}">
+                                    <Border Background="#0F172A" CornerRadius="6" BorderBrush="#334155" BorderThickness="1" 
+                                            Padding="10" Margin="0,0,6,8">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Row 1: Checkbox, Icon, Name, Provider Tag -->
+                                            <DockPanel Grid.Row="0" LastChildFill="True">
+                                                <CheckBox IsChecked="{Binding IsEnabled}" VerticalAlignment="Center" Margin="0,0,8,0"
+                                                          Checked="OnAgentSelectionChanged" Unchecked="OnAgentSelectionChanged"/>
+                                                <TextBlock Text="{Binding Icon}" FontSize="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                
+                                                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                                                    <Button Content="✏️" ToolTip="Chỉnh sửa AI này" Background="Transparent" BorderThickness="0"
+                                                            Foreground="#94A3B8" Cursor="Hand" Padding="4,2" Click="BtnEditAgent_Click"
+                                                            Tag="{Binding}"/>
+                                                    <Button Content="🗑️" ToolTip="Xóa AI này" Background="Transparent" BorderThickness="0"
+                                                            Foreground="#EF4444" Cursor="Hand" Padding="4,2" Click="BtnDeleteAgent_Click"
+                                                            Tag="{Binding}"/>
+                                                </StackPanel>
+
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="13" Foreground="#F8FAFC"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,1,0,0">
+                                                        <Border Background="#334155" CornerRadius="3" Padding="4,1" Margin="0,0,6,0">
+                                                            <TextBlock Text="{Binding Provider}" FontSize="10" Foreground="#38BDF8"/>
+                                                        </Border>
+                                                        <TextBlock Text="{Binding ModelName}" FontSize="10" Foreground="#64748B" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </DockPanel>
+
+                                            <!-- Row 2: Role description -->
+                                            <TextBlock Grid.Row="1" Text="{Binding Role}" FontSize="11" Foreground="#94A3B8" 
+                                                       Margin="28,4,0,6" TextWrapping="Wrap"/>
+
+                                            <!-- Row 3: Status Badge -->
+                                            <Border Grid.Row="2" Background="#1E293B" CornerRadius="4" Padding="6,4" Margin="28,0,0,0">
+                                                <DockPanel LastChildFill="True">
+                                                    <TextBlock Text="{Binding StatusDisplayName}" FontWeight="SemiBold" FontSize="11" 
+                                                               Foreground="{Binding StatusBadgeColor}" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding StatusMessage}" FontSize="10" Foreground="#94A3B8" 
+                                                               TextAlignment="Right" TextTrimming="CharacterEllipsis" Margin="6,0,0,0"/>
+                                                </DockPanel>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!-- Bottom Resource Footprint Note -->
+                    <Border Grid.Row="4" Background="#0F172A" CornerRadius="6" Padding="10" Margin="0,10,0,0" BorderBrush="#1E3A8A" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="🛡️ Kiểm soát tài nguyên máy" FontWeight="Bold" FontSize="11" Foreground="#60A5FA"/>
+                            <TextBlock Text="• Dung lượng ổ cứng: 0 MB (Cloud API)" FontSize="10" Foreground="#94A3B8" Margin="0,2,0,0"/>
+                            <TextBlock Text="• Tự động dự phòng Groq khi Gemini quá tải." FontSize="10" Foreground="#94A3B8"/>
+                            <TextBlock Text="• AI không chạy sẽ ở trạng thái Nghỉ ngơi." FontSize="10" Foreground="#94A3B8"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- SPLITTER -->
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center" Background="#334155"/>
+
+            <!-- RIGHT PANEL: WORKSPACE & OUTPUT -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <!-- Input & Controls -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Results Display -->
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- INPUT & CONTROLS SECTION -->
+                <Border Grid.Row="0" Background="#1E293B" CornerRadius="8" BorderBrush="#334155" BorderThickness="1" Padding="14" Margin="0,0,0,12">
+                    <StackPanel>
+                        <!-- Mode Selector Bar -->
+                        <DockPanel LastChildFill="True" Margin="0,0,0,10">
+                            <TextBlock Text="Chế độ:" FontWeight="Bold" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <RadioButton x:Name="RbSmartRouter" Content="🧠 Router Tự Động (Khuyên dùng)" IsChecked="True" 
+                                             Foreground="#F8FAFC" FontSize="12" Margin="0,0,14,0" Cursor="Hand" Checked="Mode_Changed"/>
+                                <RadioButton x:Name="RbCustomPipeline" Content="⛓️ Chuỗi Tuần Tự" Foreground="#F8FAFC" 
+                                             FontSize="12" Margin="0,0,14,0" Cursor="Hand" Checked="Mode_Changed"/>
+                                <RadioButton x:Name="RbDirectAgent" Content="💬 Hỏi 1 AI Chuyên Biệt" Foreground="#F8FAFC" 
+                                             FontSize="12" Cursor="Hand" Checked="Mode_Changed"/>
+                            </StackPanel>
+
+                            <!-- Interactive Mode CheckBox -->
+                            <CheckBox x:Name="ChkInteractiveMode" Content="🤝 Trao đổi theo từng trường hợp" IsChecked="True"
+                                      Foreground="#38BDF8" FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Right"
+                                      ToolTip="Nếu yêu cầu chưa rõ hoặc có nhiều cách giải quyết, AI Router sẽ dừng lại hỏi bạn trước khi phân công."/>
+                        </DockPanel>
+
+                        <!-- Direct Agent Picker (Visible only when Direct mode selected) -->
+                        <ComboBox x:Name="CmbDirectAgentPicker" Margin="0,0,0,10" Visibility="Collapsed"
+                                  Background="#0F172A" Foreground="#F8FAFC" FontSize="12"/>
+
+                        <!-- Prompt Input Box -->
+                        <Grid>
+                            <TextBox x:Name="TxtPromptInput" Height="75" TextWrapping="Wrap" AcceptsReturn="True" 
+                                     VerticalScrollBarVisibility="Auto" FontSize="13" 
+                                     PreviewKeyDown="TxtPromptInput_PreviewKeyDown"
+                                     ToolTip="Nhập yêu cầu; dùng Ctrl+V hoặc nút 📋 Dán ảnh để đính kèm ảnh đã sao chép"
+                                     Text="Lập trình một thuật toán sắp xếp mảng tùy chỉnh bằng C# và viết một bài giải thích chi tiết, kèm các test case."/>
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <Button x:Name="BtnAttachFiles" Content="📎 Đính kèm tệp/ảnh" Padding="9,5" Margin="0,0,8,0"
+                                    Background="#334155" Foreground="#F8FAFC" BorderBrush="#475569"
+                                    Click="BtnAttachFiles_Click" Cursor="Hand"
+                                    ToolTip="Chọn tệp văn bản, PDF hoặc hình ảnh để AI phân tích. PDF/hình ảnh sẽ được gửi tới Gemini."/>
+                            <Button Content="📋 Dán ảnh" Padding="9,5" Margin="0,0,8,0"
+                                    Background="#334155" Foreground="#F8FAFC" BorderBrush="#475569"
+                                    Click="BtnPastePromptImage_Click" Cursor="Hand"
+                                    ToolTip="Dán hình ảnh đã sao chép từ Clipboard vào yêu cầu"/>
+                            <Button x:Name="BtnGenerateChart" Content="📊 Vẽ đồ thị" Padding="9,5"
+                                    Background="#0F766E" Foreground="White" BorderThickness="0"
+                                    Click="BtnGenerateChart_Click" Cursor="Hand" Margin="0,0,8,0"
+                                    ToolTip="Tạo hình ảnh đồ thị bằng Pollinations AI"/>
+                            <Button x:Name="BtnGenerateDesign" Content="🎨 Thiết kế đồ họa" Padding="9,5"
+                                    Background="#7C3AED" Foreground="White" BorderThickness="0"
+                                    Click="BtnGenerateDesign_Click" Cursor="Hand"
+                                    ToolTip="Tạo hình ảnh thiết kế bằng Pollinations AI"/>
+                        </StackPanel>
+
+                        <ItemsControl x:Name="ItemsPromptAttachments" Margin="0,6,0,0">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#0F172A" BorderBrush="#475569" BorderThickness="1"
+                                            CornerRadius="4" Padding="6,3" Margin="0,0,6,4">
+                                        <DockPanel>
+                                            <TextBlock Text="{Binding FileName}" Foreground="#CBD5E1"
+                                                       FontSize="11" VerticalAlignment="Center" MaxWidth="260"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding FullPath}"/>
+                                            <TextBlock Text="{Binding SizeLabel}" Foreground="#64748B"
+                                                       FontSize="10" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                            <Button Content="×" Tag="{Binding}" Click="BtnRemoveAttachment_Click"
+                                                    Margin="6,0,0,0" Padding="3,0" Background="Transparent"
+                                                    Foreground="#F87171" BorderThickness="0" FontWeight="Bold"
+                                                    Cursor="Hand" ToolTip="Bỏ tệp đính kèm"/>
+                                        </DockPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Quick Template Buttons & Action Run Button -->
+                        <Grid Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <WrapPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="Mẫu:" FontSize="11" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <Button Content="💻 Code + Review" Padding="8,4" Background="#0F172A" Foreground="#94A3B8" BorderBrush="#334155" FontSize="11" Margin="0,0,6,0" Click="TemplateCode_Click" Cursor="Hand"/>
+                                <Button Content="✍️ Viết bài sáng tạo" Padding="8,4" Background="#0F172A" Foreground="#94A3B8" BorderBrush="#334155" FontSize="11" Margin="0,0,6,0" Click="TemplateWriting_Click" Cursor="Hand"/>
+                                <Button Content="🔍 Phân tích &amp; So sánh" Padding="8,4" Background="#0F172A" Foreground="#94A3B8" BorderBrush="#334155" FontSize="11" Margin="0,0,6,0" Click="TemplateResearch_Click" Cursor="Hand"/>
+                                <Button Content="📊 Mẫu đồ thị" Padding="8,4" Background="#0F172A" Foreground="#5EEAD4" BorderBrush="#0F766E" FontSize="11" Margin="0,0,6,0" Click="TemplateChart_Click" Cursor="Hand" ToolTip="Điền prompt mẫu biểu đồ doanh thu"/>
+                                <Button Content="🎨 Mẫu thiết kế" Padding="8,4" Background="#0F172A" Foreground="#C4B5FD" BorderBrush="#7C3AED" FontSize="11" Click="TemplateDesign_Click" Cursor="Hand" ToolTip="Điền prompt mẫu thiết kế poster"/>
+                            </WrapPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button x:Name="BtnCancelRun" Content="🛑 Hủy" Width="70" Height="36" Background="#EF4444" 
+                                        Foreground="White" FontWeight="Bold" BorderThickness="0" Margin="0,0,8,0" 
+                                        Click="BtnCancelRun_Click" Visibility="Collapsed" Cursor="Hand"/>
+                                <Button x:Name="BtnStartRun" Content="🚀 BẮT ĐẦU ĐIỀU PHỐI" Width="180" Height="36" 
+                                        Background="#2563EB" Foreground="White" FontWeight="Bold" FontSize="13" 
+                                        BorderThickness="0" Click="BtnStartRun_Click" Cursor="Hand"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Active Progress Indicator -->
+                        <Grid x:Name="PanelProgress" Margin="0,8,0,0" Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="TxtProgressStatus" Grid.Column="0" Text="Đang xử lý..." FontSize="12" Foreground="#38BDF8" FontWeight="SemiBold" Margin="0,0,10,0"/>
+                            <ProgressBar x:Name="ProgressBarExecution" Grid.Column="1" Height="6" IsIndeterminate="True" Background="#0F172A" Foreground="#38BDF8"/>
+                            <TextBlock x:Name="TxtTimer" Grid.Column="2" Text="0.0s" FontSize="12" Foreground="#94A3B8" Margin="10,0,0,0"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- RESULTS TABS SECTION -->
+                <Border Grid.Row="1" Background="#1E293B" CornerRadius="8" BorderBrush="#334155" BorderThickness="1">
+                    <TabControl x:Name="TabsMainResults" Background="Transparent" BorderThickness="0">
+                        
+                        <!-- TAB 1: INTERACTIVE CHAT & DISCUSSION -->
+                        <TabItem Header="💬 Trao Đổi Tương Tác">
+                            <Grid Margin="12">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <!-- Quick Suggestion Buttons Bar -->
+                                    <RowDefinition Height="Auto"/>
+                                    <!-- User Reply Bar -->
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Chat Messages Scroll -->
+                                <ScrollViewer x:Name="ScrollChatMessages" Grid.Row="0" VerticalScrollBarVisibility="Auto" Margin="0,0,0,8">
+                                    <ItemsControl x:Name="ItemsChatMessages" HorizontalContentAlignment="Stretch">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type models:ChatMessage}">
+                                                <Border CornerRadius="10" Padding="14,11" Margin="0,0,0,10"
+                                                        BorderThickness="1">
+                                                    <StackPanel>
+                                                        <!-- Header -->
+                                                        <DockPanel LastChildFill="True" Margin="0,0,0,8">
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="{Binding SenderIcon}" FontSize="17" Margin="0,0,7,0"/>
+                                                                <TextBlock Text="{Binding SenderName}" FontWeight="Bold" FontSize="13" Foreground="{Binding HeaderColor}" VerticalAlignment="Center"/>
+                                                            </StackPanel>
+                                                            <TextBlock Text="{Binding Timestamp, StringFormat='{}{0:HH:mm}'}" HorizontalAlignment="Right" FontSize="10" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                                        </DockPanel>
+
+                                                        <!-- Message Content -->
+                                                        <TextBox Text="{Binding Content}" IsReadOnly="True" IsReadOnlyCaretVisible="True"
+                                                                 AcceptsReturn="True" TextWrapping="Wrap" Foreground="#F8FAFC"
+                                                                 Background="Transparent" BorderThickness="0" Padding="0"
+                                                                 VerticalScrollBarVisibility="Auto" MaxHeight="300"
+                                                                 FontSize="14" FontFamily="Segoe UI"/>
+
+                                                        <!-- Quick Suggestions (Pill Buttons) -->
+                                                        <ItemsControl ItemsSource="{Binding QuickSuggestions}" Visibility="{Binding HasQuickSuggestions, Converter={x:Static models:BooleanToVisibilityConverter.Instance}, FallbackValue=Collapsed}" Margin="0,8,0,0">
+                                                            <ItemsControl.ItemsPanel>
+                                                                <ItemsPanelTemplate>
+                                                                    <WrapPanel Orientation="Horizontal"/>
+                                                                </ItemsPanelTemplate>
+                                                            </ItemsControl.ItemsPanel>
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <Button Content="{Binding}" Padding="10,5" Margin="0,0,6,6" Background="#334155" Foreground="#38BDF8"
+                                                                            BorderBrush="#0284C7" BorderThickness="1" FontSize="12" FontWeight="SemiBold"
+                                                                            Cursor="Hand" Click="BtnQuickSuggestion_Click" Tag="{Binding}"/>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </StackPanel>
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                                            <Setter Property="Background" Value="#1E293B"/>
+                                                            <Setter Property="BorderBrush" Value="#334155"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsUser}" Value="True">
+                                                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                                                    <Setter Property="Background" Value="#1E3A8A"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Type}" Value="{x:Static models:MessageType.ClarificationRequest}">
+                                                                    <Setter Property="Background" Value="#431407"/>
+                                                                    <Setter Property="BorderBrush" Value="#EA580C"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Type}" Value="{x:Static models:MessageType.PlanApproval}">
+                                                                    <Setter Property="Background" Value="#263616"/>
+                                                                    <Setter Property="BorderBrush" Value="#4D7C0F"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+
+                                <!-- Clarification Alert Prompt -->
+                                <Border x:Name="BorderClarificationBanner" Grid.Row="1" Background="#431407" BorderBrush="#EA580C" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,0,8" Visibility="Collapsed">
+                                    <DockPanel LastChildFill="True">
+                                        <TextBlock Text="❓ AI cần bạn làm rõ hoặc chọn hướng tiếp tục bên dưới:" FontWeight="Bold" FontSize="12" Foreground="#FDBA74"/>
+                                    </DockPanel>
+                                </Border>
+
+                                <!-- User Interactive Reply Input Box -->
+                                <Grid Grid.Row="2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                        <TextBox x:Name="TxtInteractiveReplyInput" Grid.Column="0" Height="40" VerticalContentAlignment="Center"
+                                                 TextWrapping="Wrap" FontSize="13" Padding="10,4"
+                                                 KeyDown="TxtInteractiveReplyInput_KeyDown"
+                                                 PreviewKeyDown="TxtReply_PreviewKeyDown"
+                                                 ToolTip="Nhập phản hồi; dùng Ctrl+V hoặc nút 📋 để đính kèm ảnh đã sao chép"/>
+                                        <Button x:Name="BtnAttachReplyFiles" Grid.Column="1" Content="📎" Width="38" Height="40" Margin="8,0,0,0"
+                                                Background="#334155" Foreground="#F8FAFC" BorderBrush="#475569"
+                                                Click="BtnAttachReplyFiles_Click" ToolTip="Đính kèm tệp hoặc hình ảnh cho phản hồi"/>
+                                        <Button x:Name="BtnPasteReplyImage" Grid.Column="2" Content="📋" Width="38" Height="40" Margin="8,0,0,0"
+                                                Background="#334155" Foreground="#F8FAFC" BorderBrush="#475569"
+                                                Click="BtnPasteReplyImage_Click" ToolTip="Dán ảnh từ Clipboard để AI phân tích"/>
+                                        <Button x:Name="BtnSendReply" Grid.Column="3" Content="Gửi Phản Hồi ↵" Width="130" Height="40" Margin="8,0,0,0"
+                                                Background="#2563EB" Foreground="White" FontWeight="Bold" BorderThickness="0"
+                                                Cursor="Hand" Click="BtnSendReply_Click"/>
+                                        <ItemsControl x:Name="ItemsReplyAttachments" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"
+                                                      Margin="0,5,0,0">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel Orientation="Horizontal"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#0F172A" BorderBrush="#475569" BorderThickness="1"
+                                                            CornerRadius="4" Padding="6,3" Margin="0,0,6,4">
+                                                        <DockPanel>
+                                                            <TextBlock Text="{Binding FileName}" Foreground="#CBD5E1"
+                                                                       FontSize="11" VerticalAlignment="Center" MaxWidth="220"
+                                                                       TextTrimming="CharacterEllipsis" ToolTip="{Binding FullPath}"/>
+                                                            <TextBlock Text="{Binding SizeLabel}" Foreground="#64748B"
+                                                                       FontSize="10" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                                            <Button Content="×" Tag="{Binding}" Click="BtnRemoveReplyAttachment_Click"
+                                                                    Margin="6,0,0,0" Padding="3,0" Background="Transparent"
+                                                                    Foreground="#F87171" BorderThickness="0" FontWeight="Bold"
+                                                                    Cursor="Hand" ToolTip="Bỏ tệp đính kèm"/>
+                                                        </DockPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Grid>
+                            </Grid>
+                        </TabItem>
+
+                        <!-- TAB 2: FINAL OUTPUT (Markdown) -->
+                        <TabItem Header="🏆 Kết Quả Cuối Cùng">
+                            <Grid Margin="12">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="100"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Action Toolbar -->
+                                <DockPanel Grid.Row="0" Margin="0,0,0,8" LastChildFill="True">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="Định dạng:" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <RadioButton x:Name="RbRenderedView" Content="Trực quan (Markdown)" IsChecked="True" 
+                                                     Foreground="#F8FAFC" FontSize="12" Margin="0,0,12,0" Checked="RenderView_Changed"/>
+                                        <RadioButton x:Name="RbRawTextView" Content="Văn bản thô (Raw)" 
+                                                     Foreground="#F8FAFC" FontSize="12" Checked="RenderView_Changed"/>
+                                    </StackPanel>
+                                    <Button Content="📋 Sao Chép Kết Quả" HorizontalAlignment="Right" Padding="12,5" 
+                                            Background="#334155" Foreground="#F8FAFC" BorderBrush="#475569" 
+                                            FontWeight="SemiBold" FontSize="12" Cursor="Hand" Click="BtnCopyResult_Click"/>
+                                </DockPanel>
+
+                                <!-- Rendered Markdown Viewer (WebBrowser) -->
+                                <Border Grid.Row="1" x:Name="BorderWebBrowser" Background="#0F172A" CornerRadius="6" BorderBrush="#334155" BorderThickness="1">
+                                    <WebBrowser x:Name="BrowserMarkdownView"/>
+                                </Border>
+
+                                <!-- Raw Text View -->
+                                <TextBox Grid.Row="1" x:Name="TxtRawOutput" Visibility="Collapsed" IsReadOnly="True" 
+                                         IsReadOnlyCaretVisible="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" 
+                                         Background="#0F172A" BorderBrush="#334155" FontSize="13"/>
+                                <Border Grid.Row="2" Background="#0F172A" BorderBrush="#334155" BorderThickness="1" CornerRadius="6" Margin="0,8,0,6" Padding="6">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsControl x:Name="ItemsFinalFollowUp" ItemTemplate="{StaticResource FollowUpMessageTemplate}"/>
+                                    </ScrollViewer>
+                                </Border>
+                                <Grid Grid.Row="3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="TxtFinalFollowUpInput" Height="36" VerticalContentAlignment="Center"
+                                             TextWrapping="Wrap" Padding="8,4" KeyDown="SectionFollowUp_KeyDown"
+                                             Tag="final" ToolTip="Hỏi AI về kết quả cuối cùng"/>
+                                    <Button Grid.Column="1" Content="Hỏi về kết quả ↵" Padding="10,4" Margin="8,0,0,0"
+                                            Background="#2563EB" Foreground="White" BorderThickness="0"
+                                            Click="SectionFollowUp_Click" Tag="final"/>
+                                </Grid>
+                            </Grid>
+                        </TabItem>
+
+                        <!-- TAB 3: AGENT BREAKDOWN -->
+                        <TabItem Header="📊 Kết Quả Từng AI">
+                            <Grid Margin="12">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="90"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl x:Name="ItemsExecutedAgentsBreakdown">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type models:AiAgent}">
+                                            <Border Background="#0F172A" CornerRadius="6" BorderBrush="#334155" BorderThickness="1" 
+                                                    Padding="12" Margin="0,0,0,12">
+                                                <StackPanel>
+                                                    <DockPanel LastChildFill="True">
+                                                        <TextBlock Text="{Binding Icon}" FontSize="18" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" Foreground="#38BDF8"/>
+                                                        <TextBlock Text="{Binding ExecutionTimeMs, StringFormat='⏱️ {0}ms'}" HorizontalAlignment="Right" Foreground="#10B981" FontWeight="SemiBold" FontSize="12"/>
+                                                    </DockPanel>
+
+                                                    <TextBlock Text="{Binding AssignedSubtask, StringFormat='🎯 Nhiệm vụ được giao: {0}'}" 
+                                                               FontSize="12" Foreground="#F59E0B" Margin="0,4,0,6" TextWrapping="Wrap"/>
+
+                                                    <Border Background="#1E293B" CornerRadius="4" Padding="10">
+                                                        <TextBox Text="{Binding OutputResult}" IsReadOnly="True" IsReadOnlyCaretVisible="True" TextWrapping="Wrap" 
+                                                                 Background="Transparent" BorderThickness="0" Foreground="#E2E8F0" 
+                                                                 MaxHeight="250" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="12"/>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                                <Border Grid.Row="1" Background="#0F172A" BorderBrush="#334155" BorderThickness="1" CornerRadius="6" Margin="0,8,0,6" Padding="6">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsControl x:Name="ItemsAgentFollowUp" ItemTemplate="{StaticResource FollowUpMessageTemplate}"/>
+                                    </ScrollViewer>
+                                </Border>
+                                <Grid Grid.Row="2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="170"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox x:Name="CmbAgentFollowUp" VerticalContentAlignment="Center" Margin="0,0,8,0"
+                                              Background="#0F172A" Foreground="#F8FAFC"/>
+                                    <TextBox x:Name="TxtAgentFollowUpInput" Grid.Column="1" Height="36" VerticalContentAlignment="Center"
+                                             TextWrapping="Wrap" Padding="8,4" KeyDown="SectionFollowUp_KeyDown"
+                                             Tag="agent" ToolTip="Hỏi AI về kết quả của AI đã chọn"/>
+                                    <Button Grid.Column="2" Content="Hỏi AI ↵" Padding="10,4" Margin="8,0,0,0"
+                                            Background="#2563EB" Foreground="White" BorderThickness="0"
+                                            Click="SectionFollowUp_Click" Tag="agent"/>
+                                </Grid>
+                            </Grid>
+                        </TabItem>
+
+                        <!-- TAB 4: ROUTING & EXECUTION LOGS -->
+                        <TabItem Header="📜 Nhật Ký Điều Phối (Logs)">
+                            <Grid Margin="12">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="90"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBox Grid.Row="0" x:Name="TxtExecutionLogs" IsReadOnly="True" IsReadOnlyCaretVisible="True" TextWrapping="Wrap" 
+                                         VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="12"
+                                         Background="#0F172A" BorderBrush="#334155" Foreground="#A7F3D0" Padding="10"/>
+                                <Border Grid.Row="1" Background="#0F172A" BorderBrush="#334155" BorderThickness="1" CornerRadius="6" Margin="0,8,0,6" Padding="6">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsControl x:Name="ItemsLogsFollowUp" ItemTemplate="{StaticResource FollowUpMessageTemplate}"/>
+                                    </ScrollViewer>
+                                </Border>
+                                <Grid Grid.Row="2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="170"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox x:Name="CmbLogsFollowUp" VerticalContentAlignment="Center" Margin="0,0,8,0"
+                                              Background="#0F172A" Foreground="#F8FAFC"/>
+                                    <TextBox x:Name="TxtLogsFollowUpInput" Grid.Column="1" Height="36" VerticalContentAlignment="Center"
+                                             TextWrapping="Wrap" Padding="8,4" KeyDown="SectionFollowUp_KeyDown"
+                                             Tag="logs" ToolTip="Hỏi AI giải thích nhật ký điều phối"/>
+                                    <Button Grid.Column="2" Content="Hỏi về nhật ký ↵" Padding="10,4" Margin="8,0,0,0"
+                                            Background="#2563EB" Foreground="White" BorderThickness="0"
+                                            Click="SectionFollowUp_Click" Tag="logs"/>
+                                </Grid>
+                            </Grid>
+                        </TabItem>
+
+                    </TabControl>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- BOTTOM STATUS BAR -->
+        <Border Grid.Row="2" Background="#1E293B" BorderBrush="#334155" BorderThickness="0,1,0,0" Padding="16,6">
+            <DockPanel LastChildFill="True">
+                <TextBlock x:Name="TxtStatusSummary" Text="🟢 Sẵn sàng. Nhập yêu cầu và nhấn 'Bắt Đầu Điều Phối'." 
+                           FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                <TextBlock Text="Được thiết kế cho máy cấu hình tiết kiệm • Tự động dự phòng Cloud" HorizontalAlignment="Right" 
+                           FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

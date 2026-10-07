@@ -1,0 +1,42 @@
+<Window x:Class="AIOrchestrator.Views.AvatarPickerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Ảnh đại diện"
+        Width="360"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#0F172A"
+        Foreground="#F8FAFC"
+        FontFamily="Segoe UI">
+    <StackPanel Margin="20">
+        <TextBlock Text="Ảnh đại diện tài khoản" FontSize="16" FontWeight="Bold"
+                   Foreground="#38BDF8" HorizontalAlignment="Center"/>
+        <Border Width="128" Height="128" CornerRadius="64" Background="#1E293B"
+                BorderBrush="#334155" BorderThickness="1" Margin="0,16,0,14">
+            <Grid>
+                <TextBlock x:Name="TxtAvatarFallback" Text="👤" FontSize="48"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Image x:Name="ImgAvatar" Stretch="UniformToFill" Visibility="Collapsed"/>
+            </Grid>
+        </Border>
+        <TextBlock x:Name="TxtProfileName" FontSize="14" FontWeight="SemiBold"
+                   HorizontalAlignment="Center" Margin="0,0,0,14"/>
+        <TextBlock x:Name="TxtProfileDetails" FontSize="11" Foreground="#94A3B8"
+                   HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                   Margin="0,0,0,14"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="Chọn ảnh..." Padding="12,7" Margin="0,0,8,0"
+                    Background="#2563EB" Foreground="White" BorderThickness="0"
+                    Click="BtnChoose_Click"/>
+            <Button Content="Gỡ ảnh" Padding="12,7" Margin="0,0,8,0"
+                    Background="#334155" Foreground="#F8FAFC"
+                    Click="BtnRemove_Click"/>
+            <Button Content="Đóng" Padding="12,7" Background="#334155"
+                    Foreground="#F8FAFC" Click="BtnClose_Click"/>
+        </StackPanel>
+        <TextBlock Text="Ảnh PNG, JPG hoặc BMP; dung lượng tối đa 5 MB."
+                   FontSize="11" Foreground="#94A3B8" TextWrapping="Wrap"
+                   HorizontalAlignment="Center" Margin="0,12,0,0"/>
+    </StackPanel>
+</Window>
